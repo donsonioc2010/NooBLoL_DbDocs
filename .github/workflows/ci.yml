@@ -29,4 +29,4 @@ jobs:
         env:
           DBDOCS_TOKEN: ${{ secrets.DBDOCS_TOKEN }}
 
-        run: dbdocs build ./noob.dbml --project=${{ secrets.DBDOCS_PROJECT }} --password=${{ secrets.PROJECT_PASSWORD }}
+        run: dbdocs build ./noob.dbml --project=${{ secrets.DBDOCS_PROJECT }}

@@ -267,7 +267,3 @@ table party_list {
 }
 
 REF: party_category.category_id < party_list.category_id
-
-table test {
-  test int [pk, note: "test"]
-}

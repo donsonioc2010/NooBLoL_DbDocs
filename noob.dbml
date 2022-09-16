@@ -1,0 +1,269 @@
+// Creating references
+// You can also define relaionship separately
+// > many-to-one; < one-to-many; - one-to-one
+
+// id int [pk, increment] // auto-increment
+//  quantity int [default: 1] // default value
+
+//composite foreign key
+//Ref: merchant_periods.(merchant_id, country_code) > merchants.(id, country_code)
+
+//created_at datetime [default: `now()`]
+
+//----------------------------------------------
+table summoner_account{
+  id varchar [pk, note: '소환사 ID']
+  account_id int [pk, note: '계정 ID']
+  PUUID varchar [pk, note: 'puuid']
+  name varchar [note: '소환사 닉네임']
+  profile_icon_id varchar [note: '사용중인 profile_icon_id']
+  revision_date varchar [note: '계정 생성일']
+  summoner_level int [note: '소환사 레벨']
+  note: "소환사 정보"
+}
+
+table summoner_simple_history{
+  summoner_id varchar [note: 'account의 ID 컬럼']
+  queue_type varchar [note: '랭크 큐 타입']
+  tier varchar [note: '티어(골드 등등)']
+  rank varchar [note: '1단계 2단계 등']
+  summoner_name varchar [note: '소환사 명']
+  league_points int [note: '랭크 점수']
+  wins int [note: '해당 타입 게임 승수 ']
+  losses int [note: '해당 타입 게임 패']
+  league_id varchar [note: '현재 소속된 리그의 ID']
+  note: "소환사 랭크 전적"
+}
+
+// One To Many
+REF: summoner_account.id <  summoner_simple_history.summoner_id
+
+//----------------------------------------------
+//----------------------------------------------
+//----------------------------------------------
+table match_gameinfo{
+  data_version varchar
+  match_id varchar [pk, not null, note: "매치 ID"]
+  game_creation int [note: '게임 생성 시간 ']
+  game_duration int [note: '게임 소요 시간']
+  game_end_time_stamp int [note: '게임 종료 시간']
+  game_start_time_stamp int [note: '게임 시작 시간']
+  game_id int [note: '게임 ID']
+  game_mode varchar [note: '게임 모드 (칼바람등)']
+  game_name varchar
+  game_version varchar [note: '게임 생성 version']
+  map_id int [note: '사용된 맵 ID']
+  platform_id varchar [note: '서버']
+  queue_id int [note: '해당 게임의 큐 ID']
+  Indexes {
+    (match_id)
+  }
+  note: "게임 전적 마스터테이블"
+}
+
+table match_game_bans {
+  match_id varchar [note: "매치 ID"]
+  champion_id int [note: "Ban Champion Id"]
+  pick_turn int [note: "픽 순서"]
+  Indexes {
+    (match_id)
+  }
+  note: "랭크게임의 밴카드 정보"
+}
+
+table match_participants {
+  puuid varchar [note: "puuid"]
+  match_id varchar [note: "매치 ID"]
+  champion_name varchar [note: "사용 챔피언 이름 "]
+  champion_id int [note: "사용 챔피언 ID"]
+  champion_level int [note: "해당 매치 챔피언 레벨"]
+  summoner_id varchar [note: "소환사 ID"]
+  summoner_name varchar [note: "소환사 명 "]
+  kills int [note: "해당 매치 킬수"]
+  deaths int [note: "해당 매치 데스 수 "]
+  assists int [note: "해당 매치 어시스트"]
+  role varchar [note: "맡은 역할"]
+  lane varchar [note: " 맡은 라인"]
+  team_id int [note: "팀 ID"]
+  team_position varchar [note: "맡은 라인"]
+  win tinyint [note: "승패여부, true가 승리"]
+  summoner1_casts int [note: "소환사 주문1 사용횟수"]
+  summoner1_id int  [note: "소환사 주문1 ID"]
+  summoner2_casts int [note: "소환사 주문2 사용횟수"]
+  summoner2_id int  [note: "소환사 주문2 ID"]
+  item0 int [note: "아이템1"]
+  item1 int [note: "아이템2"]
+  item2 int [note: "아이템3"]
+  item3 int [note: "아이템4"]
+  item4 int [note: "아이템5"]
+  item5 int [note: "아이템6"]
+  item6 int [note: "아이템7"]
+  Indexes {
+    (match_id, team_id)
+  }
+  note: "게임 참가자들의 전적 정보"
+}
+
+table match_game_runes {
+  puuid varchar [not null, note: "puuid"]
+  match_id varchar [not null, note: "매치 ID"]
+  type varchar [note: "스탯 / 룬 타입"]
+  sort_no int [note: "스탯 순서, 룬 순서"]
+  perk int [note: "사용한 룬 ID"]
+  note: "게임 참가자가 선택한 룬의 정보"
+}
+
+// One To Many
+REF: match_gameinfo.match_id <  match_game_bans.match_id
+REF: match_gameinfo.match_id < match_participants.match_id
+Ref: match_participants.(puuid) < match_game_runes.(puuid)
+REF: match_gameinfo.(match_id) < match_game_runes.(match_id)
+//----------------------------------------------
+//----------------------------------------------
+//----------------------------------------------
+//커뮤니티
+table users{
+  user_id varchar [pk, note: "유저 고유 ID"]
+  user_email varchar [unique, note: "로그인시 사용되는 ID"]
+  user_name varchar [note: "닉네임"]
+  user_password_hash varchar [note: "비밀번호"]
+  user_role int [note:"사용권한 활성(1),비활성(2), 정지(3), 관리자(9) "]
+  level int [default: 1, note: "사용자 커뮤니티 레벨"]
+  exp int [default: 0, note: "사용자 경험치 량"]
+  created_at datetime [default: `now()`, note: "계정 생성 일"]
+  updated_at datetime [note: "최종 수정일"]
+  note: "회원 정보"
+}
+
+table users_letter{
+  letter_id int [pk, increment, note: "쪽지 생성 ID"]
+  letter_title varchar [not null, note: "쪽지 제목"]
+  letter_content text [note: "쪽지 내용"]
+  to_user_id varchar [not null, note: "받는 사람"]
+  to_status int [note: "수신자 쪽지 상태"]
+  from_user_id varchar [not null, note: "보낸 사람"]
+  from_status int [note: "발신자 쪽지 상태"]
+  created_at datetime [default: `now()`, note: "쪽지 생성일"]
+  Indexes{
+    (letter_id, created_at)
+  }
+  note: "쪽지 데이터"
+}
+
+REF: users.(user_id, user_id) < users_letter.(to_user_id, from_user_id)
+
+//----------------------------------------------
+//----------------------------------------------
+//----------------------------------------------
+table bbs_category {
+  category_id int [pk, increment, note: "카테고리 ID"]
+  category_name varchar [note: "카테고리 명"]
+  status int [note: "활성(1), 비활성(2)"]
+  created_user_id varchar [note: "생성한 관리자 ID"]
+  created_at datetime [default: `now()`, note: "생성일"]
+  updated_user_id varchar [note: "최종 수정한 관리자 ID"]
+  updated_at datetime [note: "최종 수정일"]
+  note: "게시판 카테고리"
+}
+
+//게시판
+table bbs{
+  bbs_id int [pk, increment, note: "게시판ID"]
+  category_id int [note: "카테고리 ID"]
+  bbs_name varchar [note: "게시판 명"]
+  status int [note:"활성(1), 비활성(2), 비밀게시판(3)"]
+  created_user_id varchar  [note: "생성한 관리자ID"]
+  created_at datetime [default: `now()`, note: "생성일"]
+  updated_user_id varchar [note: "최종 수정한 관리자 ID"]
+  updated_at datetime [note: "최종 수정일"]
+  Indexes{
+    (category_id, bbs_id)
+  }
+  note: "게시판"
+}
+
+table bbs_articles{
+  article_id int [pk, note: "게시글ID"]
+  bbs_id int [note: "게시판ID"]
+  article_title varchar [note: "게시글 제목"]
+  article_read_count int [note: "조회 수"]
+  article_content text [note: "게시글 내용"]
+  status int [note: "공개글(1), 비공개(2), 삭제(9)"]
+  created_user_id varchar  [note: "작성자 userId"]
+  created_at datetime [default: `now()`, note:"작성일" ]
+  updated_at datetime [note: "최종 수정일"]
+  Indexes {
+    (bbs_id, article_id, created_at)
+  }
+  note: "게시글"
+}
+
+table bbs_articles_status {
+  article_id int [note: "게시글 ID"]
+  bbs_id int [note: "게시판 ID"]
+  user_id varchar  [note: "사용자 ID"]
+  type tinyint [note: "추천(true, 1), 비추천(false, 2)"]
+  created_at datetime [default: `now()`, note: "기능 실행 일자"]
+  Indexes{
+    (bbs_id, article_id)
+  }
+  note: "게시글 추천, 비추천"
+}
+
+//status = 0:all 1:Secret 9: del
+table bbs_article_reply {
+  reply_id int [pk, increment, note: "댓글 ID"]
+  article_id int [note: "게시글 ID"]
+  bbs_id int [note: "게시판 ID"]
+  reply_content text [note: "댓글 내용"]
+  status int [note: "공개(1), 비밀(2), 삭제(9)"]
+  sort_no int [note: "댓글 순서"]
+  created_user_id varchar [note: "작성자 userId"]
+  created_at datetime [default: `now()`, note: "댓글 작성일"]
+  Indexes{
+    (bbs_id, article_id, reply_id)
+  }
+  note: "게시글 댓글"
+}
+
+REF: users.(user_id, user_id) < bbs_category.(created_user_id, updated_user_id)
+REF: users.(user_id, user_id) < bbs.(created_user_id, updated_user_id)
+REF: users.(user_id) < bbs_articles.(created_user_id)
+REF: users.(user_id) < bbs_articles_status.(user_id)
+REF: users.(user_id) < bbs_article_reply.(created_user_id)
+
+
+REF: bbs_category.category_id < bbs.category_id
+REF: bbs.bbs_id < bbs_articles.bbs_id
+
+REF: bbs_articles.(bbs_id, article_id) < bbs_articles_status.(bbs_id, article_id)
+REF: bbs_articles.(bbs_id, article_id) < bbs_article_reply.(bbs_id, article_id)
+
+
+//----------------------------------------------
+//----------------------------------------------
+//----------------------------------------------
+//파티 찾아요!!!
+table party_category{
+  category_id int [pk, increment, note: "파티카테고리 ID"]
+  category_name varchar [note: "카테고리 명(게임종류)"]
+  status int  [note: "사용중(1)"]
+  created_user_id int  [note: "생성한 관리자 ID"]
+  created_at datetime [default: `now()`, note: "카테고리 생성일"]
+  updated_user_id int [note: "수정한 관리자 ID"]
+  updated_at datetime [note: "수정일"]
+  note: "파티찾기 카테고리"
+}
+
+table party_list {
+  party_id int [pk, increment, note: "파티(게시글) ID"]
+  category_id int [note: "파티 카테고리ID"]
+  party_title varchar [note: "글제목"]
+  party_content text [note: "글 내용"]
+  character_id varchar [note: "실제 인게임 캐릭터 명"]
+  password_hash varchar [note: "해당 글 삭제권한 패스워드"]
+  created_at datetime [default: `now()`, note: "게시글 생성일"]
+  note: "파티찾기 게시글"
+}
+
+REF: party_category.category_id < party_list.category_id

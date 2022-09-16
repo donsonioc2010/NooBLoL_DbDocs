@@ -15,14 +15,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # DBDocs Install
       - name: Install dbdocs
         run: sudo npm install -g dbdocs
 
+      #DBDocs Install Check
       - name: Check dbdocs
         run: dbdocs
 
       # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          DBDOCS_TOKEN = ${{ secrets.DBDOCS_TOKEN }}
-          dbdocs build ./noob.dbml --project=${{ secrets.DBDOCS_PROJECT }} --password=${{ secrets.PROJECT_PASSWORD }}
+      - name: Update dbdocs project
+
+        env:
+          DBDOCS_TOKEN: ${{ secrets.DBDOCS_TOKEN }}
+
+        run: dbdocs build ./noob.dbml --project=${{ secrets.DBDOCS_PROJECT }} --password=${{ secrets.PROJECT_PASSWORD }}

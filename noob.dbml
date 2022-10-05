@@ -183,7 +183,7 @@ table bbs{
 }
 
 table bbs_articles{
-  article_id int [pk, note: "게시글ID"]
+  article_id int [pk, increment, note: "게시글ID"]
   bbs_id int [note: "게시판ID"]
   article_title varchar [note: "게시글 제목"]
   article_read_count int [note: "조회 수"]
